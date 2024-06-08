@@ -1,5 +1,6 @@
 import { json } from 'stream/consumers';
 import {pool} from '../db.js'
+import nodemailer from 'nodemailer';
 
 export const getUsers = async(req, res)=>{
 
@@ -34,7 +35,7 @@ try {
     const data = req.body;
 
     const {rows} = await pool.query('INSERT INTO USERS (ID, NAME,EMAIL,PASSWORD) VALUES ($1,$2,$3,$4)', [data.id, data.name, data.email, data.password]);
-    
+    await enviarMail(data.email);
     return res.json(rows[0]);
 } catch (error) {
     if(error?.code ==='23505'){
@@ -69,3 +70,28 @@ export const deleteUser =  async(req, res)=>{
    
     return res.json(rows[0]);
 }
+
+
+
+const enviarMail = async (correo)=>{
+    const config ={
+        host: 'smtp.gmail.com',
+        port: '587',
+        secure: false,
+        auth: {
+            user: 'ixcaquic22@gmail.com',
+            pass: 'hecc mjrw amtt ocyf'
+        }
+    };
+
+    const message ={
+        from: 'ixcaquic22@gmail.com',
+        to: correo,
+        subject: 'Registro exitoso',
+        text: 'Tu registro fue exitoso.'
+    }
+
+    const transport = nodemailer.createTransport(config);
+    const info = await transport.sendMail(message);
+    console.log(info)
+};
